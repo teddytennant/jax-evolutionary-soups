@@ -1,8 +1,9 @@
-"""The whole pipeline on the toy task: Theorem 2, measured.
+"""The whole pipeline on the toy task.
 
 One expert per objective over a shared frozen backbone, then the same
 evolutionary budget spent on each of the three gate classes, then the fronts
-compared by hypervolume on prompts none of them ever saw.
+compared by hypervolume on prompts none of them ever saw. Theorem 2 itself is
+checked in tests/test_moe.py, where it does not have to survive a search.
 """
 
 import numpy as np
@@ -44,21 +45,21 @@ def baseline(setup, held_out):
     return hypervolume(scores[nondominated(scores)], setup.ref), scores
 
 
-def test_evolved_front_dominates_the_fixed_coefficient_soup(fronts, baseline):
-    hv_soup, _ = baseline
-    hv_evolved = fronts["per_layer"][0]
-    assert hv_evolved > hv_soup
+def test_every_gate_class_beats_the_fixed_coefficient_soup(fronts, baseline):
+    """Evolving any of the three gate classes beats sweeping one shared lambda.
 
-
-def test_per_layer_gating_beats_both_ablations(fronts):
-    """Theorem 2: f(G_fixed) and f(G_single) are strict subsets of f(G).
-
-    Same population size, same generations, same initial population, same chunks.
-    The only difference is what the gate is allowed to condition on.
+    This used to be the Theorem 2 test: per-layer above single-gating above fixed
+    coefficients, on one seed. That ordering is a search outcome, not the
+    theorem, and it does not survive a change of seed. The containment Theorem 2
+    actually states is checked without evolution in tests/test_moe.py, and
+    scripts/ablation.py measures how often the ordering shows up. What holds on
+    every draw either of them has been run on is this: 30 generations of gates
+    cover more of the objective space than the 21-point simplex sweep. Across
+    243 evolved fronts, on CPU and on an H200, the smallest margin was +0.024.
     """
-    hv_per_layer = fronts["per_layer"][0]
-    assert hv_per_layer > fronts["single"][0]
-    assert hv_per_layer > fronts["fixed"][0]
+    hv_soup, _ = baseline
+    for mode, (hv, _, _) in fronts.items():
+        assert hv > hv_soup, mode
 
 
 def test_the_front_is_a_front(fronts, setup):

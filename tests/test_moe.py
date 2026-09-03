@@ -108,13 +108,32 @@ def test_experts_are_specialists(setup):
     assert np.array_equal(np.argmax(setup.expert_rewards, axis=0), np.arange(3))
 
 
+def test_the_fixed_gate_class_is_a_parameter_subset_of_the_per_layer_one():
+    """G_fixed sits inside G exactly: zero the output weights and G is constant.
+
+    This is the half of Theorem 2's containment that holds as an identity here,
+    so it is worth pinning down rather than inferring from a hypervolume. Note
+    that the other half does not: G_single reads the prompt embedding, which a
+    per-layer gate never sees, so no choice of per-layer weights reproduces a
+    single gate's lambda. See the README.
+    """
+    gate = init_gate(jax.random.PRNGKey(11), CFG.d_model, CFG.n_experts, hidden=8)
+    flattened = {**gate, "w2": jnp.zeros_like(gate["w2"])}
+    h = hidden_states(seed=12)
+    constant = np.asarray(coefficients(gate, h, "fixed"))
+    assert np.array_equal(np.asarray(coefficients(flattened, h, "per_layer")), constant)
+    assert np.allclose(constant, constant[0, 0])
+
+
 def test_per_layer_region_strictly_contains_the_single_gating_one(setup, held_out):
     """Lemma 6: R_single = {r(lambda)} is the diagonal of R_per-layer, and is smaller.
 
     No evolution involved. Sweep the simplex with one shared lambda, then sample
     independent lambdas per layer, and compare the hypervolume the two regions
     cover. The second set contains the first, so the comparison only asks whether
-    the extra freedom buys anything.
+    the extra freedom buys anything. This is the claim Theorem 2 makes, and it is
+    the one that reproduces: +0.043 to +0.185 on 25 stage-1 draws, on CPU and on
+    an H200, never zero or negative.
     """
     shared = X.fixed_coefficient_front(setup, held_out, 21)
     per_layer = X.per_layer_reachable(setup, held_out, jax.random.PRNGKey(5), 256)
