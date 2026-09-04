@@ -12,6 +12,7 @@ uv pip install -e .
     python -m evolutionary_soups   # train experts, evolve the gates, select by preference
     python scripts/smoke.py        # three objectives, bigger population, prints the backend
     python scripts/ablation.py     # the Section 4.3 ablation, swept over seeds
+    python scripts/start_vs_end.py # what evolution gained over its starting population
 
 ## what is not the paper
 
@@ -28,8 +29,12 @@ selection over the evolved front (Eq. 1).
 Lemma 8 says greedy hypervolume subset selection is exact for three or fewer
 objectives. It is not, and the counterexample in tests/test_hypervolume.py has
 three points in two dimensions. That is also why Theorem 3's
-HV_t(S_t) >= HV_t(S_{t-1}) dips on one or two generations in twenty five, each
-time by well under a percent.
+HV_t(S_t) >= HV_t(S_{t-1}) dips. On the toy in tests/test_evolution.py that is
+one or two generations in twenty five. On the real pipeline it turns on the gate
+class: over 50 runs of 30 generations, 0.3% of generations for per-layer, 0.7%
+for single gating, 6.7% for fixed, worst single run 5 of 30. I have not chased
+down why fixed is the one that trips it. Every dip is small either way. The
+worst over those 150 runs was 0.62% of the final hypervolume.
 
 The ablation ordering is the other one, and it is worse than I first wrote. What
 Theorem 2 states is a containment of reward regions, and that part holds. Sample
@@ -52,6 +57,32 @@ evolution seed. Two of the ten GPU draws come out negative on average, and
 So the number the old test asserted, per-layer above single-gating on one seed,
 was a coin flip with a bias, and it is gone. scripts/ablation.py is what
 measures it now.
+
+The third one was smaller and it was mine, not the paper's.
+`test_evolution_improved_on_its_starting_population` compared the last
+generation's `hv_retained` with the first generation's `hv_previous`, both read
+straight off `result.history`. Algorithm 1 draws a fresh chunk D_t every
+generation, so those two hypervolumes are measured on different samples of 256
+prompts, and the sample moves them further than thirty generations of evolution
+do. Hold one population fixed and score it on 40 chunks: a starting population
+gives sd 0.091 and the front it evolves into gives sd 0.076, against a gap
+between their means of 0.15. So the comparison came out negative on 39 of 150
+runs, and not for one gate class more than another: 8/50 per-layer, 16/50 single
+gating, 15/50 fixed. An H200 hit it on the fixed gate first, 0.352 against
+0.364, which is what got reported. Nothing about that gate class is special
+here.
+
+The improvement itself is real, it just needs the same prompts on both sides.
+The held-out set does not move, and on it the evolved front covers more
+hypervolume than the population it grew out of on every draw: 25 evolution seeds
+against two stage-1 setups, 150 runs, +0.059 at the smallest and +0.130 on
+average. `EvolutionResult` carries the starting population now so the test can
+score it, and scripts/start_vs_end.py prints the two comparisons side by side.
+
+Not a backend question either. Evolving from one pickled stage-1 setup gave
+hypervolumes identical to the last bit at 16 threads and at 4, so the search is
+not sensitive to how the arithmetic is split. Stage 1 still is, which is the
+next section.
 
 ## why the numbers move between runs
 

@@ -1,0 +1,16 @@
+setup 0: argmax [0, 1, 2] specialists=True min_margin=+0.3378
+setup 1: argmax [0, 1, 2] specialists=True min_margin=+0.3027
+setup 2: argmax [0, 1, 2] specialists=True min_margin=+0.1287
+setup 3: argmax [0, 1, 2] specialists=True min_margin=+0.2547
+setup 4: argmax [0, 1, 2] specialists=True min_margin=+0.2261
+setup 5: argmax [0, 1, 2] specialists=True min_margin=+0.3378
+setup 6: argmax [0, 1, 2] specialists=True min_margin=+0.3530
+setup 7: argmax [0, 1, 2] specialists=True min_margin=+0.2633
+setup 8: argmax [0, 1, 2] specialists=True min_margin=+0.2439
+setup 9: argmax [0, 1, 2] specialists=True min_margin=+0.4485
+setup 10: argmax [0, 1, 2] specialists=True min_margin=+0.3404
+setup 11: argmax [0, 1, 2] specialists=True min_margin=+0.2535
+setup 12: argmax [0, 1, 2] specialists=True min_margin=+0.2794
+setup 13: argmax [0, 1, 2] specialists=True min_margin=+0.1840
+setup 14: argmax [0, 1, 2] specialists=True min_margin=+0.2034
+specialists on 15/15 stage-1 draws

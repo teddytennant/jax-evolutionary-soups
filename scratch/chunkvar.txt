@@ -1,0 +1,7 @@
+expert_rewards[0] [-0.053299550791549986, -0.37185089071950983, -0.4530274339539621]
+per_layer  initial pop (evolve seed 1)     mean 0.3520  sd 0.0913 min 0.0947  max 0.5741  range 0.4794
+per_layer  evolved front (evolve seed 1)   mean 0.5035  sd 0.0763 min 0.2804  max 0.6915  range 0.4111
+   single  initial pop (evolve seed 1)     mean 0.3488  sd 0.0906 min 0.0930  max 0.5715  range 0.4785
+   single  evolved front (evolve seed 1)   mean 0.4893  sd 0.0779 min 0.2681  max 0.6818  range 0.4137
+    fixed  initial pop (evolve seed 1)     mean 0.3487  sd 0.0906 min 0.0933  max 0.5713  range 0.4780
+    fixed  evolved front (evolve seed 1)   mean 0.4997  sd 0.0761 min 0.2759  max 0.6864  range 0.4105
